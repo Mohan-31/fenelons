@@ -39,7 +39,7 @@ interface ProductionSnapshot {
 // Define meat cut types per meat type
 const MEAT_CUTS: Record<string, string[]> = {
   turkey: ['Whole Turkey', 'Turkey Crown', 'Turkey Breast', 'Turkey Legs', 'Turkey Wings'],
-  ham: ['Whole Ham', 'Half Ham', 'Ham Steaks', 'Ham Hock'],
+  ham: ['Whole Fillet Ham', 'Shoulder Fillet Ham', 'Boneless Ham', 'Gammon Joint', 'Half Ham'],
   beef: ['Ribeye', 'Sirloin', 'Fillet', 'Brisket', 'Mince'],
   lamb: ['Leg', 'Shoulder', 'Chops', 'Rack'],
   pork: ['Loin', 'Belly', 'Shoulder', 'Chops', 'Sausages'],
