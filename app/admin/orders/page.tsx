@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export default function OrdersGateway() {
     async function fetchSummary() {
       try {
         // Updated to matching API structure
-        const res = await fetch('/api/admin/stats?type=summary') 
+        const res = await fetch('/api/admin/stats/summary') 
         const data = await res.json()
         setSummary(data)
       } catch (err) {

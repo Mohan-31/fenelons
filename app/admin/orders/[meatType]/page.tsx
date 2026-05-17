@@ -9,10 +9,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-/**
- * PRODUCTION DASHBOARD - Single File Implementation
- * Local butcher shop - No auth, no admin logic
- */
 
 interface Order {
   id: string;
@@ -555,3 +551,4 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
     </div>
   );
 }
+

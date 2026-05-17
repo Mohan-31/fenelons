@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -40,11 +40,15 @@ const weightOptions: {
   { value: 'custom', label: 'Custom weight' },
 ]
 
+function getMeatType(title: string): string {
+  if (title === 'Turkey') return 'turkey'
+  if (title === 'Ham') return 'ham'
+  return 'other'
+}
+
 export default function MeatCard({ title, description }: Props) {
-  // Use context hook to access global meat state
   const { order, updateMeat } = useOrder()
 
-  // UI Local States
   const [open, setOpen] = useState(false)
   const [showTerms, setShowTerms] = useState(false)
   const [agreed, setAgreed] = useState(false)
@@ -52,7 +56,6 @@ export default function MeatCard({ title, description }: Props) {
   const isTurkey = title === 'Turkey'
   const cuts = isTurkey ? turkeyCuts : hamCuts
 
-  // Calculate weight for display and serving logic
   const finalWeight =
     order.meat.weight === 'custom'
       ? Number(order.meat.customWeight)
@@ -63,7 +66,6 @@ export default function MeatCard({ title, description }: Props) {
       ? Math.floor((finalWeight * 1000) / (isTurkey ? 500 : 300))
       : null
 
-  // Validation logic
   const isValid =
     order.meat.pickupDate &&
     finalWeight &&
@@ -71,11 +73,19 @@ export default function MeatCard({ title, description }: Props) {
     order.meat.cut &&
     agreed
 
+  function handleToggle() {
+    if (!open) {
+      // When opening this card, set meatType so the order knows which meat was chosen
+      updateMeat({ meatType: getMeatType(title) })
+    }
+    setOpen(!open)
+  }
+
   return (
     <div className="rounded-3xl bg-white/80 backdrop-blur-md border shadow-sm">
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         className="w-full text-left p-6 flex justify-between items-center"
       >
         <div>
@@ -104,14 +114,12 @@ export default function MeatCard({ title, description }: Props) {
                   Pickup Date
                 </label>
 
-                {/* Date Display */}
                 <div className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-black">
                   {order.meat.pickupDate
                     ? format(new Date(order.meat.pickupDate), 'dd MMM yyyy')
                     : 'Select a pickup date'}
                 </div>
 
-                {/* Calendar Picker */}
                 <div className="mt-3 mx-auto rounded-3xl bg-white/70 backdrop-blur-xl border shadow-lg p-4 max-w-md lg:max-w-sm">
                   <DayPicker
                     mode="single"
@@ -123,6 +131,7 @@ export default function MeatCard({ title, description }: Props) {
                     onSelect={(date) =>
                       updateMeat({
                         pickupDate: date ? date.toISOString() : '',
+                        meatType: getMeatType(title),
                       })
                     }
                     className="text-[#1f1f1f]"
@@ -146,9 +155,9 @@ export default function MeatCard({ title, description }: Props) {
                   if (!selected) return
 
                   if (selected.value === 'custom') {
-                    updateMeat({ weight: 'custom', customWeight: '' })
+                    updateMeat({ weight: 'custom', customWeight: '', meatType: getMeatType(title) })
                   } else {
-                    updateMeat({ weight: selected.value, customWeight: '' })
+                    updateMeat({ weight: selected.value, customWeight: '', meatType: getMeatType(title) })
                   }
                 }}
               />
@@ -179,7 +188,7 @@ export default function MeatCard({ title, description }: Props) {
                 label="Cut / Part Required"
                 value={order.meat.cut || ''}
                 options={cuts}
-                onChange={(value) => updateMeat({ cut: value })}
+                onChange={(value) => updateMeat({ cut: value, meatType: getMeatType(title) })}
               />
 
               {/* Additional Notes */}
@@ -243,7 +252,7 @@ export default function MeatCard({ title, description }: Props) {
                   type="checkbox"
                   id="agree-checkbox"
                   checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)} // Fixed toggle logic
+                  onChange={(e) => setAgreed(e.target.checked)}
                   className="cursor-pointer"
                 />
                 <label htmlFor="agree-checkbox" className="text-sm text-black cursor-pointer">

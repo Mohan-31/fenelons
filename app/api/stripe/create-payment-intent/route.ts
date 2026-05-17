@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { ADVANCE_PRICE_EUR } from '@/app/config/pricing'
 
@@ -12,8 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing order details' }, { status: 400 })
     }
 
-    // ✅ Mandatory Fix: Rounding to prevent floating point math errors
-    const amountCents = Math.round(ADVANCE_PRICE_EUR * 100) 
+    const amountCents = Math.round(ADVANCE_PRICE_EUR * 100)
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountCents,
@@ -24,8 +23,9 @@ export async function POST(req: Request) {
         customerPhone: customer.phone,
         customerEmail: customer.email,
         pickupDate: meat.pickupDate,
+        meatType: meat.meatType || 'turkey',
         weight: String(meat.weight),
-        customWeight: meat.customWeight || '', // ✅ Mandatory Fix: Added custom weight
+        customWeight: meat.customWeight || '',
         cut: meat.cut,
         notes: meat.notes || 'None',
       },
