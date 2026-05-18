@@ -75,14 +75,15 @@ export default function Hero() {
           </a>
         </motion.div>
 
-        {/* Stats — 2×2 grid */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mt-14"
         >
-          <div className="inline-grid grid-cols-2 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden">
+          {/* Mobile: 2×2 bordered grid */}
+          <div className="md:hidden inline-grid grid-cols-2 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden">
             {STATS.map(({ num, label }, i) => (
               <div
                 key={label}
@@ -92,8 +93,18 @@ export default function Hero() {
                   i < 2 ? 'border-b border-gray-200 dark:border-white/8' : ''
                 }`}
               >
-                <span className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white block">{num}</span>
+                <span className="text-2xl font-black text-gray-900 dark:text-white block">{num}</span>
                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 mt-1 block">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: horizontal row with dividers */}
+          <div className="hidden md:flex items-start divide-x divide-gray-200 dark:divide-white/10">
+            {STATS.map(({ num, label }) => (
+              <div key={label} className="px-10 first:pl-0">
+                <span className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-white block leading-none">{num}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-white/30 mt-2 block">{label}</span>
               </div>
             ))}
           </div>
