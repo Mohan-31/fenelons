@@ -2,68 +2,102 @@
 
 import { motion } from 'framer-motion'
 
+const STATS = [
+  { num: '€30', label: 'Deposit to Secure' },
+  { num: '100%', label: 'Free Range' },
+  { num: '2', label: 'Meat Types' },
+  { num: '1', label: 'Local Butcher' },
+]
+
 export default function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-[#7a0000] via-[#8b0000] to-[#4a0d0d] text-white overflow-hidden">
-      
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_60%)]" />
+    <section className="relative min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex flex-col justify-center overflow-hidden">
+      {/* Glow blobs */}
+      <div className="absolute top-0 right-0 w-175 h-175 bg-[#8B0000]/10 dark:bg-[#8B0000]/20 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-125 h-125 bg-[#8B0000]/6 dark:bg-[#8B0000]/10 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-14 items-center">
-        
-        {/* Text */}
+      <div className="relative max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-16 w-full">
+
+        {/* Badge */}
         <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex mb-8"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#8B0000]/10 dark:bg-[#8B0000]/15 border border-[#8B0000]/25 dark:border-[#8B0000]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse shrink-0" />
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8B0000] dark:text-[#cc4444]">
+              Christmas 2025 · Pre-Orders Now Open
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Main headline */}
+        <motion.h1
           initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="font-black italic uppercase text-gray-900 dark:text-white leading-[0.88] tracking-tight"
+          style={{ fontSize: 'clamp(3.5rem, 12vw, 10.5rem)' }}
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
-            Christmas Meat <br />
-            <span className="text-[#ffd6d6]">Done Right</span>
-          </h1>
+          <span className="block">Christmas</span>
+          <span className="block text-[#8B0000]">Meat.</span>
+        </motion.h1>
 
-          <p className="mt-6 text-lg text-white/90 max-w-xl">
-            Pre-order premium turkeys, hams and festive cuts from Fenelons.
-            Skip the rush. Collect fresh.
-          </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="font-black italic uppercase text-gray-300 dark:text-white/20 tracking-[0.06em]"
+          style={{ fontSize: 'clamp(1.5rem, 4.5vw, 4rem)' }}
+        >
+          Done Right.
+        </motion.p>
 
-          <div className="mt-10 flex gap-4 flex-wrap">
-            <a
-              href="#order"
-              className="px-8 py-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 font-semibold hover:bg-white/30 transition"
-            >
-              Order Now
-            </a>
-
-            <a
-              href="#about"
-              className="px-8 py-4 rounded-2xl border border-white/40 font-semibold hover:bg-white/10 transition"
-            >
-              Learn More
-            </a>
-          </div>
-        </motion.div>
-
-        {/* Visual card */}
+        {/* Description + CTA */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="hidden md:block"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-6"
         >
-          <div className="rounded-3xl bg-white/15 backdrop-blur-lg border border-white/20 p-10 shadow-2xl">
-            <h3 className="text-xl font-semibold mb-4">🎄 Christmas Specials</h3>
-            <ul className="space-y-3 text-white/90">
-              <li>✔ Free-range Turkeys</li>
-              <li>✔ Honey-glazed Hams</li>
-              <li>✔ Custom cuts & weights</li>
-              <li>✔ Advance booking</li>
-            </ul>
-          </div>
+          <p className="text-gray-500 dark:text-white/35 font-bold text-sm leading-relaxed max-w-xs uppercase tracking-wider">
+            Premium turkeys &amp; hams from Fenelons.<br />
+            Skip the Christmas rush. Collect fresh.
+          </p>
+          <a
+            href="#order"
+            className="group flex items-center gap-3 px-8 py-4 bg-[#8B0000] text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-[#a50000] transition-colors shrink-0 shadow-lg shadow-[#8B0000]/25"
+          >
+            Place Your Order
+            <span className="group-hover:translate-x-1.5 transition-transform duration-200">→</span>
+          </a>
         </motion.div>
 
+        {/* Stats — 2×2 grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="mt-14"
+        >
+          <div className="inline-grid grid-cols-2 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden">
+            {STATS.map(({ num, label }, i) => (
+              <div
+                key={label}
+                className={`px-8 py-5 ${
+                  i % 2 === 0 ? 'border-r border-gray-200 dark:border-white/8' : ''
+                } ${
+                  i < 2 ? 'border-b border-gray-200 dark:border-white/8' : ''
+                }`}
+              >
+                <span className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white block">{num}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-white/25 mt-1 block">{label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )

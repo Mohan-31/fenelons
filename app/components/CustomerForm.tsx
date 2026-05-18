@@ -2,41 +2,45 @@
 
 import { useOrder } from '@/app/context/OrderContext'
 
+const fields = [
+  { key: 'name',  label: 'Full Name',     type: 'text',  placeholder: 'John Smith' },
+  { key: 'phone', label: 'Phone Number',  type: 'tel',   placeholder: '+353 87 000 0000' },
+  { key: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com' },
+]
+
 export default function CustomerForm() {
   const { order, updateCustomer } = useOrder()
 
   return (
-    <div className="rounded-3xl bg-white/80 backdrop-blur-md border shadow-sm p-6 max-w-xl mx-auto">
-      <h3 className="text-xl font-semibold text-[#8B0000] mb-4">
-        Customer Details
-      </h3>
+    <div className="rounded-3xl bg-gray-100 dark:bg-white/4 border border-gray-200 dark:border-white/10 p-6 md:p-8">
+      <div className="mb-6">
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#8B0000] dark:text-[#cc4444] mb-1">
+          Step 2 of 2
+        </p>
+        <h3
+          className="font-black italic uppercase text-gray-900 dark:text-white leading-none"
+          style={{ fontSize: 'clamp(1.6rem, 4vw, 2.5rem)' }}
+        >
+          Your Details.
+        </h3>
+      </div>
 
-      {/* Name */}
-      <input
-        type="text"
-        placeholder="Full Name"
-        value={order.customer.name}
-        onChange={(e) => updateCustomer({ name: e.target.value })}
-        className="w-full mb-4 rounded-xl border border-black/10 px-4 py-3 text-black"
-      />
-
-      {/* Phone */}
-      <input
-        type="tel"
-        placeholder="Phone Number"
-        value={order.customer.phone}
-        onChange={(e) => updateCustomer({ phone: e.target.value })}
-        className="w-full mb-4 rounded-xl border border-black/10 px-4 py-3 text-black"
-      />
-
-      {/* Email */}
-      <input
-        type="email"
-        placeholder="Email Address"
-        value={order.customer.email}
-        onChange={(e) => updateCustomer({ email: e.target.value })}
-        className="w-full rounded-xl border border-black/10 px-4 py-3 text-black"
-      />
+      <div className="grid md:grid-cols-3 gap-4">
+        {fields.map(({ key, label, type, placeholder }) => (
+          <div key={key}>
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30 mb-2">
+              {label}
+            </label>
+            <input
+              type={type}
+              placeholder={placeholder}
+              value={order.customer[key as keyof typeof order.customer]}
+              onChange={(e) => updateCustomer({ [key]: e.target.value })}
+              className="w-full rounded-2xl border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-5 py-4 text-gray-900 dark:text-white font-bold placeholder:text-gray-400 dark:placeholder:text-white/15 focus:border-[#8B0000] outline-none transition-all text-sm"
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

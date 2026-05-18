@@ -7,15 +7,12 @@ import { ADVANCE_PRICE_EUR } from '@/app/config/pricing'
 export default function CheckoutForm() {
   const stripe = useStripe()
   const elements = useElements()
-
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
     if (!stripe || !elements) return
-
     setLoading(true)
     setError(null)
 
@@ -33,33 +30,33 @@ export default function CheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl border border-black/5 shadow-xl">
+    <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-7 md:p-8">
       <PaymentElement className="mb-6" />
 
       {error && (
-        <div className="p-4 mb-6 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100">
-          {error}
+        <div className="p-4 mb-6 bg-red-50 text-red-700 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-2">
+          <span>⚠</span>
+          <span>{error}</span>
         </div>
       )}
 
       <button
         disabled={!stripe || loading}
-        className="w-full rounded-2xl bg-[#8B0000] py-4 text-white font-bold text-lg shadow-lg hover:bg-[#a30000] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-5 rounded-2xl bg-[#8B0000] text-white font-black uppercase tracking-widest text-sm hover:bg-[#a50000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
       >
         {loading ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <>
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Processing...
-          </span>
+          </>
         ) : (
-          `Pay €${ADVANCE_PRICE_EUR} Deposit Now`
+          `Pay €${ADVANCE_PRICE_EUR} Deposit Now →`
         )}
       </button>
 
-      <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-4 grayscale opacity-60">
-        {/* Placeholder for small card brand icons if desired */}
-        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Protected by Stripe</p>
-      </div>
+      <p className="mt-5 text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+        🔒 Secured by Stripe · Your card details are never stored
+      </p>
     </form>
   )
 }
