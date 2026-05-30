@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UtensilsCrossed, CalendarDays, Plus, X } from 'lucide-react'
+import { CalendarDays, Plus, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { useOrder } from '@/app/context/OrderContext'
 import Calendar from './Calendar'
@@ -26,34 +26,16 @@ const WEIGHTS = [
   { value: 'custom' as const, label: 'Custom', sub: 'specify kg' },
 ]
 
-function TurkeyIcon({ className }: { className?: string }) {
+function FeneIcon({ open }: { open: boolean }) {
   return (
-    <svg width="26" height="26" viewBox="0 0 100 100" fill="currentColor" className={className} aria-hidden="true">
-      <ellipse cx="50" cy="34" rx="14" ry="17" />
-      <ellipse cx="50" cy="58" rx="26" ry="20" />
-      <path d="M30 70 Q18 77 15 84 Q19 88 24 84 Q29 80 34 72Z" />
-      <path d="M70 70 Q82 77 85 84 Q81 88 76 84 Q71 80 66 72Z" />
-      <ellipse cx="50" cy="88" rx="34" ry="6" />
-    </svg>
+    <span
+      className={`text-2xl font-black italic leading-none transition-colors select-none ${
+        open ? 'text-white' : 'text-[#8B0000]'
+      }`}
+    >
+      F
+    </span>
   )
-}
-
-function HamIcon({ className }: { className?: string }) {
-  return (
-    <svg width="26" height="26" viewBox="0 0 100 100" fill="currentColor" className={className} aria-hidden="true">
-      <ellipse cx="44" cy="62" rx="36" ry="30" />
-      <rect x="60" y="14" width="18" height="44" rx="9" transform="rotate(20 69 36)" />
-      <circle cx="82" cy="14" r="13" />
-      <circle cx="72" cy="44" r="7" fill="white" />
-    </svg>
-  )
-}
-
-function MeatIcon({ title, open }: { title: string; open: boolean }) {
-  const cls = `transition-colors ${open ? 'text-white' : 'text-gray-500 dark:text-white/50'}`
-  if (title === 'Turkey') return <TurkeyIcon className={cls} />
-  if (title === 'Ham') return <HamIcon className={cls} />
-  return <UtensilsCrossed size={26} className={cls} />
 }
 
 function getMeatType(title: string) {
@@ -108,7 +90,7 @@ export default function MeatCard({ title, description }: Props) {
               open ? 'bg-[#8B0000] shadow-lg shadow-[#8B0000]/30' : 'bg-gray-100 dark:bg-white/8'
             }`}
           >
-            <MeatIcon title={title} open={open} />
+            <FeneIcon open={open} />
           </div>
           <div>
             <h3
@@ -172,7 +154,7 @@ export default function MeatCard({ title, description }: Props) {
                   </span>
                 </div>
 
-                <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-4">
+                <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
                   <Calendar
                     selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
                     onSelect={(date) =>
@@ -269,7 +251,7 @@ export default function MeatCard({ title, description }: Props) {
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
                   Special Requests{' '}
-                  <span className="text-gray-300 dark:text-white/20 normal-case font-bold tracking-normal">(optional)</span>
+                  <span className="text-gray-400 dark:text-white/30 normal-case font-bold tracking-normal">(optional)</span>
                 </p>
                 <textarea
                   placeholder="Any special preparation notes..."

@@ -90,9 +90,9 @@ export default function Calendar({ selected, onSelect }: Props) {
       </div>
 
       {/* Day grid */}
-      <div className="grid grid-cols-7 gap-0.5 md:gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {days.map((day, i) => {
-          if (!day) return <div key={`e-${i}`} className="aspect-square" />
+          if (!day) return <div key={`e-${i}`} className="h-8" />
 
           const isSelected = selected && isSameDay(day, selected)
           const isDisabledDay = isPast(day)
@@ -105,7 +105,7 @@ export default function Calendar({ selected, onSelect }: Props) {
               onClick={() => !isDisabledDay && onSelect(day)}
               disabled={isDisabledDay}
               className={`
-                aspect-square w-full flex items-center justify-center rounded-lg font-bold text-xs transition-all duration-100
+                h-8 w-full flex items-center justify-center rounded-md font-bold text-xs transition-all duration-100
                 ${isSelected
                   ? 'bg-[#8B0000] text-white shadow-md shadow-[#8B0000]/30'
                   : isDisabledDay

@@ -49,7 +49,7 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="font-black italic uppercase text-gray-300 dark:text-white/20 tracking-[0.06em]"
+          className="font-black italic uppercase text-gray-400 dark:text-white/20 tracking-[0.06em]"
           style={{ fontSize: 'clamp(1.5rem, 4.5vw, 4rem)' }}
         >
           Done Right.
