@@ -77,14 +77,14 @@ export default function CartSummary() {
                   </p>
                   <p className="text-[10px] font-bold text-gray-400 dark:text-white/30">
                     {item.weight === 'custom'
-                      ? item.customWeight || '—'
+                      ? item.customWeight || 'N/A'
                       : item.weight
                       ? `${item.weight}kg`
-                      : '—'}
+                      : 'N/A'}
                     {' · '}
                     {item.pickupDate
                       ? format(new Date(item.pickupDate), 'dd MMM yyyy')
-                      : '—'}
+                      : 'N/A'}
                   </p>
                 </div>
 

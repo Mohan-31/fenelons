@@ -612,7 +612,7 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-[10px] font-black uppercase text-gray-400">Weight</span>
                     <span className="text-sm font-black text-gray-900">
-                      {selectedOrder.customWeight || (selectedOrder.weight ? `${selectedOrder.weight}kg` : '—')}
+                      {selectedOrder.customWeight || (selectedOrder.weight ? `${selectedOrder.weight}kg` : 'N/A')}
                     </span>
                   </div>
                   <div className="flex justify-between items-center gap-2">

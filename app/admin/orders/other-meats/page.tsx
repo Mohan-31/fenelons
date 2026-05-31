@@ -215,7 +215,7 @@ export default function OtherMeatsPage() {
             <h1 className="text-5xl md:text-7xl font-black italic uppercase text-gray-900 leading-none">
               Other <span className="text-[#8B0000]">Meats.</span>
             </h1>
-            <p className="text-gray-600 font-bold uppercase text-[9px] tracking-[0.3em]">Production Floor — Beef · Lamb · Chicken</p>
+            <p className="text-gray-600 font-bold uppercase text-[9px] tracking-[0.3em]">Production Floor · Beef · Lamb · Chicken</p>
           </div>
 
           {/* Production Stats by Subcategory */}
@@ -462,7 +462,7 @@ export default function OtherMeatsPage() {
                   </div>
                   <div>
                     <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Qty / Weight</p>
-                    <p className="font-black text-gray-900 text-sm">{order.customWeight || (order.weight > 0 ? `${order.weight}kg` : '—')}</p>
+                    <p className="font-black text-gray-900 text-sm">{order.customWeight || (order.weight > 0 ? `${order.weight}kg` : 'N/A')}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Pickup</p>
@@ -580,7 +580,7 @@ export default function OtherMeatsPage() {
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-[10px] font-black uppercase text-gray-400">Qty / Weight</span>
                     <span className="text-sm font-black text-gray-900">
-                      {selectedOrder.customWeight || (selectedOrder.weight > 0 ? `${selectedOrder.weight}kg` : '—')}
+                      {selectedOrder.customWeight || (selectedOrder.weight > 0 ? `${selectedOrder.weight}kg` : 'N/A')}
                     </span>
                   </div>
                   <div className="flex justify-between items-center gap-2">

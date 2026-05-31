@@ -259,7 +259,7 @@ export default function MeatCard({ title, description }: Props) {
                         className="w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
                       />
                       <p className="mt-2 text-xs font-bold text-gray-400 dark:text-white/30">
-                        No minimum — order any amount
+                        No minimum, order any amount
                       </p>
                     </div>
                   )}

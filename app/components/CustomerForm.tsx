@@ -45,7 +45,7 @@ export default function CustomerForm() {
       <p className="mt-5 text-xs font-bold text-gray-400 dark:text-white/30 text-center">
         Please read our{' '}
         <span className="text-[#8B0000] dark:text-[#cc4444]">Terms &amp; Conditions</span>
-        {' '}before paying the deposit — you will be prompted to agree when you click the button below.
+        {' '}before paying the deposit. You will be prompted to agree when you click the button below.
       </p>
     </div>
   )

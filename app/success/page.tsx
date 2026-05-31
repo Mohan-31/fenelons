@@ -87,10 +87,10 @@ async function generateAndDownloadReceipt(
 
     const weightLabel =
       item.weight === 'custom'
-        ? `${item.customWeight || '—'}`
+        ? `${item.customWeight || 'N/A'}`
         : item.weight
         ? `${item.weight}kg`
-        : '—'
+        : 'N/A'
 
     const pickupLabel = item.pickupDate
       ? format(new Date(item.pickupDate), 'EEEE, dd MMMM yyyy')

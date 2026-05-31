@@ -122,16 +122,16 @@ export default function CheckoutPage() {
                     {
                       label: 'Weight',
                       value: item.weight === 'custom'
-                        ? `${item.customWeight || '—'}`
+                        ? `${item.customWeight || 'N/A'}`
                         : item.weight
                         ? `${item.weight}kg`
-                        : '—',
+                        : 'N/A',
                     },
                     {
                       label: 'Pickup',
                       value: item.pickupDate
                         ? format(new Date(item.pickupDate), 'dd MMM yyyy')
-                        : '—',
+                        : 'N/A',
                     },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between items-center">
