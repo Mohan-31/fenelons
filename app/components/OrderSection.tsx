@@ -12,7 +12,7 @@ export default function OrderSection() {
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-10">
         <div className="inline-block px-3 py-1.5 bg-[#8B0000]/10 dark:bg-[#8B0000]/15 border border-[#8B0000]/20 rounded text-[#8B0000] dark:text-[#cc4444] text-[10px] font-black uppercase tracking-[0.25em] mb-5">
-          Pre-Order 2025
+          Pre-Order 2026
         </div>
         <h2
           className="font-black italic uppercase text-gray-900 dark:text-white leading-none"
@@ -21,7 +21,7 @@ export default function OrderSection() {
           Place Your <span className="text-[#8B0000]">Order.</span>
         </h2>
         <p className="text-gray-400 dark:text-white/30 font-bold uppercase text-[11px] tracking-[0.25em] mt-4">
-          Select your meat · configure your order · secure with a €25 deposit
+          Select your meat · configure your order · secure with a €30 deposit
         </p>
       </div>
 

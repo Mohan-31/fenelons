@@ -28,7 +28,7 @@ export default function Hero() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#8B0000]/10 dark:bg-[#8B0000]/15 border border-[#8B0000]/25 dark:border-[#8B0000]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse shrink-0" />
             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8B0000] dark:text-[#cc4444]">
-              Christmas 2025 · Pre-Orders Now Open
+              Christmas 2026 · Pre-Orders Now Open
             </span>
           </div>
         </motion.div>
