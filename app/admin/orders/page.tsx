@@ -14,7 +14,7 @@ function FLogo({ className }: { className?: string }) {
 }
 
 export default function OrdersGateway() {
-  const [summary, setSummary] = useState({ turkey: 0, ham: 0, total: 0 })
+  const [summary, setSummary] = useState({ turkey: 0, ham: 0, other: 0, total: 0 })
 
   useEffect(() => {
     async function fetchSummary() {
@@ -31,6 +31,7 @@ export default function OrdersGateway() {
 
   const turkeyPercentage = summary.total > 0 ? (summary.turkey / summary.total) * 100 : 0
   const hamPercentage = summary.total > 0 ? (summary.ham / summary.total) * 100 : 0
+  const otherPercentage = summary.total > 0 ? (summary.other / summary.total) * 100 : 0
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
@@ -97,6 +98,21 @@ export default function OrdersGateway() {
                     />
                   </div>
                 </div>
+
+                <div>
+                  <div className="flex justify-between mb-3 text-sm font-black uppercase tracking-tight">
+                    <span className="flex items-center gap-2 text-gray-900">
+                      <span className="text-base font-black italic text-[#8B0000]">F</span> Other Meats
+                    </span>
+                    <span className="text-[#8B0000]">{summary.other} Units</span>
+                  </div>
+                  <div className="w-full bg-gray-100 h-6 rounded-2xl overflow-hidden border p-1">
+                    <div
+                      className="bg-[#8B0000] h-full rounded-xl transition-all duration-1000 ease-out shadow-lg"
+                      style={{ width: `${otherPercentage}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -111,10 +127,10 @@ export default function OrdersGateway() {
           </div>
 
           {/* CTA Nav Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <Link
               href="/admin/orders/turkey"
-              className="group bg-red-50 p-8 md:p-12 rounded-[48px] border-2 border-red-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
+              className="group bg-red-50 p-8 md:p-10 rounded-[48px] border-2 border-red-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
             >
               <div className="flex justify-between items-start">
                 <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
@@ -130,7 +146,7 @@ export default function OrdersGateway() {
 
             <Link
               href="/admin/orders/ham"
-              className="group bg-[#fff5f0] p-8 md:p-12 rounded-[48px] border-2 border-orange-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
+              className="group bg-[#fff5f0] p-8 md:p-10 rounded-[48px] border-2 border-orange-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
             >
               <div className="flex justify-between items-start">
                 <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
@@ -140,6 +156,22 @@ export default function OrdersGateway() {
               </div>
               <div className="mt-8">
                 <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none text-gray-900">Ham<br />Orders</h2>
+                <p className="text-gray-500 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/orders/other-meats"
+              className="group bg-[#fdf8f0] p-8 md:p-10 rounded-[48px] border-2 border-amber-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
+            >
+              <div className="flex justify-between items-start">
+                <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
+                  <FLogo className="text-[#8B0000]" />
+                </div>
+                <ArrowRight className="text-gray-200 group-hover:text-[#8B0000] group-hover:translate-x-2 transition-all" size={32} />
+              </div>
+              <div className="mt-8">
+                <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none text-gray-900">Other<br />Meats</h2>
                 <p className="text-gray-500 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
               </div>
             </Link>

@@ -16,8 +16,8 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#order" className="text-white/50 hover:text-white font-bold uppercase text-[11px] tracking-[0.2em] transition-colors">Order</a>
-          <a href="#about" className="text-white/50 hover:text-white font-bold uppercase text-[11px] tracking-[0.2em] transition-colors">About</a>
+          <a href="/#order" className="text-white/50 hover:text-white font-bold uppercase text-[11px] tracking-[0.2em] transition-colors">Order</a>
+          <a href="/about" className="text-white/50 hover:text-white font-bold uppercase text-[11px] tracking-[0.2em] transition-colors">About</a>
           <a href="#order" className="px-5 py-2.5 bg-[#8B0000] text-white rounded-xl font-black uppercase text-[11px] tracking-[0.15em] hover:bg-[#a30000] transition-colors">
             Order Now
           </a>

@@ -1,6 +1,8 @@
 ﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/prisma'
 
+const OTHER_MEATS_TYPES = ['beef', 'lamb', 'chicken']
+
 function parseWeight(weight: string, customWeight: string | null): number {
   if (weight === 'custom' || weight === 'unknown') {
     const parsed = parseFloat(customWeight || '0')
@@ -19,14 +21,19 @@ export async function POST(req: Request) {
     }
 
     const isFinished = status === 'done'
+    const isOtherMeats = ['other', 'other-meats'].includes(meatType.toLowerCase())
 
     await prisma.order.updateMany({
       where: { id: { in: orderIds } },
       data: { isFinished },
     })
 
+    const whereClause = isOtherMeats
+      ? { meatType: { in: OTHER_MEATS_TYPES } }
+      : { meatType: meatType.toLowerCase() }
+
     const dbOrders = await prisma.order.findMany({
-      where: { meatType: meatType.toLowerCase() },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
     })
 
@@ -40,6 +47,7 @@ export async function POST(req: Request) {
       status: o.isFinished ? 'done' : 'pending',
       cut: o.cut,
       weight: parseWeight(o.weight, o.customWeight),
+      meatType: o.meatType,
       customWeight: o.customWeight || null,
       notes: o.notes || null,
       pickupDate: o.pickupDate.toISOString(),

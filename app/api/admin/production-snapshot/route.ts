@@ -10,6 +10,8 @@ function parseWeight(weight: string, customWeight: string | null): number {
   return isNaN(parsed) ? 0 : parsed
 }
 
+const OTHER_MEATS_TYPES = ['beef', 'lamb', 'chicken']
+
 function mapOrder(order: any, oneDayAgo: Date) {
   const weight = parseWeight(order.weight, order.customWeight)
   return {
@@ -20,6 +22,7 @@ function mapOrder(order: any, oneDayAgo: Date) {
     status: order.isFinished ? 'done' : 'pending',
     cut: order.cut,
     weight,
+    meatType: order.meatType,
     customWeight: order.customWeight || null,
     notes: order.notes || null,
     pickupDate: order.pickupDate.toISOString(),
@@ -36,9 +39,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'meatType required' }, { status: 400 })
   }
 
+  const isOtherMeats = meatType.toLowerCase() === 'other-meats'
+  const whereClause = isOtherMeats
+    ? { meatType: { in: OTHER_MEATS_TYPES } }
+    : { meatType: meatType.toLowerCase() }
+
   try {
     const dbOrders = await prisma.order.findMany({
-      where: { meatType: meatType.toLowerCase() },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
     })
 

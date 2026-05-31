@@ -15,7 +15,6 @@ type Props = {
 const CUTS: Record<string, string[]> = {
   Turkey: ['Whole Turkey', 'Turkey Crown', 'Turkey Breast', 'Turkey Legs', 'Turkey Wings'],
   Ham: ['Whole Fillet Ham', 'Shoulder Fillet Ham', 'Boneless Ham', 'Gammon Joint', 'Half Ham'],
-  'Other Meats': ['Whole Fillet Ham', 'Shoulder Fillet Ham', 'Boneless Ham', 'Gammon Joint', 'Half Ham'],
 }
 
 const WEIGHTS = [
@@ -25,6 +24,15 @@ const WEIGHTS = [
   { value: 10 as number | 'custom', label: '10kg', sub: 'serves 20+' },
   { value: 'custom' as const, label: 'Custom', sub: 'specify kg' },
 ]
+
+const OTHER_SUBCATEGORIES = ['Beef', 'Lamb', 'Chicken'] as const
+type OtherSub = typeof OTHER_SUBCATEGORIES[number]
+
+const OTHER_PRODUCTS: Record<OtherSub, string[]> = {
+  Beef: ['Fillet Steak', 'Rib Eye Steak', 'Strip Loin Steak', 'Tomahawk Steak', 'Strip Loin Roast', 'Top Round Roast'],
+  Lamb: ['Rack of Lamb', 'Center Loin Chops', 'Side Loin Chops', 'Gigot Chops', 'Lamb Flaps'],
+  Chicken: ['Chicken Legs', 'Chicken Breast', 'Chicken Wings', 'Chicken Drumsticks', 'Chicken Fillets'],
+}
 
 function FeneIcon({ open }: { open: boolean }) {
   return (
@@ -41,7 +49,7 @@ function FeneIcon({ open }: { open: boolean }) {
 function getMeatType(title: string) {
   if (title === 'Turkey') return 'turkey'
   if (title === 'Ham') return 'ham'
-  return 'other'
+  return ''
 }
 
 export default function MeatCard({ title, description }: Props) {
@@ -50,8 +58,16 @@ export default function MeatCard({ title, description }: Props) {
   const [showTerms, setShowTerms] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
+  const isOther = title === 'Other Meats'
   const isTurkey = title === 'Turkey'
-  const cuts = CUTS[title] || CUTS['Ham']
+  const cuts = CUTS[title] || []
+
+  // Derive active subcategory from context meatType
+  const currentSub: OtherSub | null = isOther
+    ? (OTHER_SUBCATEGORIES.find(s => s.toLowerCase() === order.meat.meatType) ?? null)
+    : null
+
+  const otherProducts = currentSub ? OTHER_PRODUCTS[currentSub] : []
 
   const finalWeight =
     order.meat.weight === 'custom'
@@ -63,11 +79,26 @@ export default function MeatCard({ title, description }: Props) {
       ? Math.floor((finalWeight * 1000) / (isTurkey ? 500 : 300))
       : null
 
-  const isValid = !!order.meat.pickupDate && finalWeight >= 3 && !!order.meat.cut && agreed
+  const isValid = isOther
+    ? !!order.meat.pickupDate && !!currentSub && !!order.meat.cut && !!order.meat.customWeight?.trim() && agreed
+    : !!order.meat.pickupDate && finalWeight >= 3 && !!order.meat.cut && agreed
 
   function handleToggle() {
-    if (!open) updateMeat({ meatType: getMeatType(title) })
+    if (!open) {
+      if (isOther) {
+        // If no Other Meats subcategory is active, clear state for fresh selection
+        if (!OTHER_SUBCATEGORIES.some(s => s.toLowerCase() === order.meat.meatType)) {
+          updateMeat({ meatType: '', cut: '', weight: undefined, customWeight: '' })
+        }
+      } else {
+        updateMeat({ meatType: getMeatType(title) })
+      }
+    }
     setOpen(!open)
+  }
+
+  function selectSubcategory(sub: OtherSub) {
+    updateMeat({ meatType: sub.toLowerCase(), cut: '', customWeight: '', weight: 'custom' })
   }
 
   return (
@@ -133,121 +164,218 @@ export default function MeatCard({ title, description }: Props) {
           >
             <div className="border-t-2 border-gray-100 dark:border-white/6 px-6 md:px-8 py-8 space-y-8">
 
-              {/* 1. Pickup Date */}
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-4">
-                  Pickup Date
-                </p>
+              {isOther ? (
+                <>
+                  {/* OTHER MEATS — Step 1: Subcategory */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
+                      Select Category
+                    </p>
+                    <div className="flex gap-3">
+                      {OTHER_SUBCATEGORIES.map(sub => (
+                        <button
+                          key={sub}
+                          type="button"
+                          onClick={() => selectSubcategory(sub)}
+                          className={`flex-1 py-3.5 rounded-2xl border-2 font-black text-sm uppercase tracking-wider transition-all ${
+                            currentSub === sub
+                              ? 'border-[#8B0000] bg-[#8B0000] text-white shadow-md shadow-[#8B0000]/20'
+                              : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-700 dark:text-white/70 hover:border-gray-300 dark:hover:border-white/20'
+                          }`}
+                        >
+                          {sub}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                <div
-                  className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-sm mb-5 ${
-                    order.meat.pickupDate
-                      ? 'bg-[#8B0000] text-white'
-                      : 'bg-gray-100 dark:bg-white/8 text-gray-400 dark:text-white/40'
-                  }`}
-                >
-                  <CalendarDays size={15} />
-                  <span>
-                    {order.meat.pickupDate
-                      ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
-                      : 'Pick a date below'}
-                  </span>
-                </div>
+                  {/* OTHER MEATS — Step 2: Product */}
+                  {currentSub && (
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
+                        Select Product
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {otherProducts.map(product => (
+                          <button
+                            key={product}
+                            type="button"
+                            onClick={() => updateMeat({ cut: product, meatType: currentSub.toLowerCase() })}
+                            className={`px-4 py-2.5 rounded-xl border-2 font-black text-xs uppercase tracking-wider transition-all ${
+                              order.meat.cut === product
+                                ? 'border-[#8B0000] bg-[#8B0000] text-white'
+                                : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:border-gray-300 dark:hover:border-white/20'
+                            }`}
+                          >
+                            {product}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
-                  <Calendar
-                    selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
-                    onSelect={(date) =>
-                      updateMeat({
-                        pickupDate: date.toISOString(),
-                        meatType: getMeatType(title),
-                      })
-                    }
-                  />
-                </div>
-              </div>
+                  {/* OTHER MEATS — Step 3: Quantity */}
+                  {currentSub && (
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
+                        Quantity / Weight
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="e.g. 2 pieces, 1.5kg, 4 fillets..."
+                        value={order.meat.customWeight || ''}
+                        onChange={(e) => updateMeat({ customWeight: e.target.value, weight: 'custom' })}
+                        className="w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
+                      />
+                      <p className="mt-2 text-xs font-bold text-gray-400 dark:text-white/30">
+                        No minimum — order any amount
+                      </p>
+                    </div>
+                  )}
 
-              {/* 2. Weight chips */}
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
-                  Select Weight
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  {WEIGHTS.map((w) => {
-                    const sel =
-                      w.value === 'custom'
-                        ? order.meat.weight === 'custom'
-                        : order.meat.weight === w.value
-                    return (
-                      <button
-                        key={w.label}
-                        type="button"
-                        onClick={() => {
-                          if (w.value === 'custom') {
-                            updateMeat({ weight: 'custom', customWeight: '', meatType: getMeatType(title) })
-                          } else {
-                            updateMeat({ weight: w.value as number, customWeight: '', meatType: getMeatType(title) })
-                          }
-                        }}
-                        className={`flex flex-col items-center px-5 py-3.5 rounded-2xl border-2 font-black transition-all ${
-                          sel
-                            ? 'border-[#8B0000] bg-[#8B0000] text-white shadow-md shadow-[#8B0000]/20'
-                            : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-700 dark:text-white/70 hover:border-gray-300 dark:hover:border-white/20'
-                        }`}
-                      >
-                        <span className="text-base">{w.label}</span>
-                        <span className={`text-[10px] font-bold tracking-wider mt-0.5 ${sel ? 'text-white/70' : 'text-gray-400 dark:text-white/30'}`}>
-                          {w.sub}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {order.meat.weight === 'custom' && (
-                  <input
-                    type="number"
-                    min={3}
-                    step={0.5}
-                    placeholder="Enter weight in kg (min 3kg)"
-                    value={order.meat.customWeight}
-                    onChange={(e) => updateMeat({ customWeight: e.target.value })}
-                    className="mt-4 w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
-                  />
-                )}
-
-                {serves && (
-                  <p className="mt-3 text-sm font-bold text-gray-500 dark:text-white/40">
-                    Comfortably serves{' '}
-                    <span className="text-[#8B0000] font-black">{serves}+ people</span>
-                  </p>
-                )}
-              </div>
-
-              {/* 3. Cut chips */}
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
-                  Cut / Part Required
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {cuts.map((cut) => (
-                    <button
-                      key={cut}
-                      type="button"
-                      onClick={() => updateMeat({ cut, meatType: getMeatType(title) })}
-                      className={`px-4 py-2.5 rounded-xl border-2 font-black text-xs uppercase tracking-wider transition-all ${
-                        order.meat.cut === cut
-                          ? 'border-[#8B0000] bg-[#8B0000] text-white'
-                          : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:border-gray-300 dark:hover:border-white/20'
+                  {/* OTHER MEATS — Step 4: Pickup Date */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-4">
+                      Pickup Date
+                    </p>
+                    <div
+                      className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-sm mb-5 ${
+                        order.meat.pickupDate
+                          ? 'bg-[#8B0000] text-white'
+                          : 'bg-gray-100 dark:bg-white/8 text-gray-400 dark:text-white/40'
                       }`}
                     >
-                      {cut}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      <CalendarDays size={15} />
+                      <span>
+                        {order.meat.pickupDate
+                          ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
+                          : 'Pick a date below'}
+                      </span>
+                    </div>
+                    <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
+                      <Calendar
+                        selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
+                        onSelect={(date) =>
+                          updateMeat({ pickupDate: date.toISOString(), meatType: currentSub?.toLowerCase() || order.meat.meatType })
+                        }
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* TURKEY / HAM — Step 1: Pickup Date */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-4">
+                      Pickup Date
+                    </p>
+                    <div
+                      className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-sm mb-5 ${
+                        order.meat.pickupDate
+                          ? 'bg-[#8B0000] text-white'
+                          : 'bg-gray-100 dark:bg-white/8 text-gray-400 dark:text-white/40'
+                      }`}
+                    >
+                      <CalendarDays size={15} />
+                      <span>
+                        {order.meat.pickupDate
+                          ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
+                          : 'Pick a date below'}
+                      </span>
+                    </div>
+                    <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
+                      <Calendar
+                        selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
+                        onSelect={(date) =>
+                          updateMeat({ pickupDate: date.toISOString(), meatType: getMeatType(title) })
+                        }
+                      />
+                    </div>
+                  </div>
 
-              {/* 4. Notes */}
+                  {/* TURKEY / HAM — Step 2: Weight */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
+                      Select Weight
+                    </p>
+                    <div className="flex flex-wrap gap-2.5">
+                      {WEIGHTS.map((w) => {
+                        const sel =
+                          w.value === 'custom'
+                            ? order.meat.weight === 'custom'
+                            : order.meat.weight === w.value
+                        return (
+                          <button
+                            key={w.label}
+                            type="button"
+                            onClick={() => {
+                              if (w.value === 'custom') {
+                                updateMeat({ weight: 'custom', customWeight: '', meatType: getMeatType(title) })
+                              } else {
+                                updateMeat({ weight: w.value as number, customWeight: '', meatType: getMeatType(title) })
+                              }
+                            }}
+                            className={`flex flex-col items-center px-5 py-3.5 rounded-2xl border-2 font-black transition-all ${
+                              sel
+                                ? 'border-[#8B0000] bg-[#8B0000] text-white shadow-md shadow-[#8B0000]/20'
+                                : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-700 dark:text-white/70 hover:border-gray-300 dark:hover:border-white/20'
+                            }`}
+                          >
+                            <span className="text-base">{w.label}</span>
+                            <span className={`text-[10px] font-bold tracking-wider mt-0.5 ${sel ? 'text-white/70' : 'text-gray-400 dark:text-white/30'}`}>
+                              {w.sub}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {order.meat.weight === 'custom' && (
+                      <input
+                        type="number"
+                        min={3}
+                        step={0.5}
+                        placeholder="Enter weight in kg (min 3kg)"
+                        value={order.meat.customWeight}
+                        onChange={(e) => updateMeat({ customWeight: e.target.value })}
+                        className="mt-4 w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
+                      />
+                    )}
+
+                    {serves && (
+                      <p className="mt-3 text-sm font-bold text-gray-500 dark:text-white/40">
+                        Comfortably serves{' '}
+                        <span className="text-[#8B0000] font-black">{serves}+ people</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* TURKEY / HAM — Step 3: Cut */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
+                      Cut / Part Required
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {cuts.map((cut) => (
+                        <button
+                          key={cut}
+                          type="button"
+                          onClick={() => updateMeat({ cut, meatType: getMeatType(title) })}
+                          className={`px-4 py-2.5 rounded-xl border-2 font-black text-xs uppercase tracking-wider transition-all ${
+                            order.meat.cut === cut
+                              ? 'border-[#8B0000] bg-[#8B0000] text-white'
+                              : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:border-gray-300 dark:hover:border-white/20'
+                          }`}
+                        >
+                          {cut}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Notes (shared) */}
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 dark:text-white/35 mb-3">
                   Special Requests{' '}
