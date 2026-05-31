@@ -37,6 +37,8 @@ const MEAT_CUTS: Record<string, string[]> = {
   other: ['Whole Fillet Ham', 'Shoulder Fillet Ham', 'Boneless Ham', 'Gammon Joint', 'Half Ham'],
 }
 
+const PREDEFINED_WEIGHTS = [3, 5, 7, 10]
+
 type StatusFilter = 'pending' | 'done' | 'all'
 type DateFilter = 'all' | 'today' | 'tomorrow' | 'custom'
 
@@ -395,25 +397,35 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
                   </div>
                 )}
 
-                {/* Row 3: Weight filter (dynamic from data) */}
-                {availableWeights.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Weight</p>
-                    <div className="flex flex-wrap gap-2">
-                      {availableWeights.map(w => (
-                        <button
-                          key={w}
-                          onClick={() => toggleWeight(w)}
-                          className={`px-3 py-2 rounded-xl font-black text-xs transition-all ${
-                            weightFilters.has(w) ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          {w}kg
-                        </button>
-                      ))}
-                    </div>
+                {/* Row 3: Weight filter */}
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Weight</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PREDEFINED_WEIGHTS.map(w => (
+                      <button
+                        key={w}
+                        onClick={() => toggleWeight(w)}
+                        className={`px-3 py-2 rounded-xl font-black text-xs transition-all ${
+                          weightFilters.has(w) ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {w}kg
+                      </button>
+                    ))}
+                    {/* Also show any custom weights from actual orders */}
+                    {availableWeights.filter(w => !PREDEFINED_WEIGHTS.includes(w)).map(w => (
+                      <button
+                        key={w}
+                        onClick={() => toggleWeight(w)}
+                        className={`px-3 py-2 rounded-xl font-black text-xs transition-all ${
+                          weightFilters.has(w) ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {w}kg
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
 
                 {/* Clear */}
                 {activeFilterCount > 0 && (

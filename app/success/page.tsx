@@ -149,6 +149,11 @@ export default function SuccessPage() {
 
     if (status !== 'succeeded') return
 
+    // Backup: ensure order is saved in DB even if webhook was delayed/missed
+    if (paymentRef) {
+      fetch(`/api/orders/confirm?payment_intent=${paymentRef}`).catch(() => {})
+    }
+
     const raw = localStorage.getItem('order-data')
     if (!raw) return
 
@@ -171,18 +176,6 @@ export default function SuccessPage() {
         transition={{ type: 'spring', damping: 22, stiffness: 200 }}
         className="relative max-w-lg w-full"
       >
-        {/* Check circle */}
-        <div className="w-24 h-24 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center mx-auto mb-8">
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', damping: 15, stiffness: 300 }}
-            className="text-green-400 text-4xl font-black"
-          >
-            ✓
-          </motion.span>
-        </div>
-
         {/* Badge */}
         <div className="inline-block px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
           <span className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500 dark:text-green-400">

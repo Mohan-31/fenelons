@@ -32,9 +32,17 @@ body {
 }
 
 ::placeholder {
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.dark ::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 input, select, textarea {
   color: #111;
+}
+
+.dark input, .dark select, .dark textarea {
+  color: #fff;
 }

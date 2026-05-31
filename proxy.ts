@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 const PUBLIC_ADMIN_PATHS = ['/admin/login', '/admin/setup', '/admin/forgot-password']
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const session = request.cookies.get('admin_session')
   const isAuthenticated = session?.value === 'true'
