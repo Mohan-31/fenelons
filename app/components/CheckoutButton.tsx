@@ -14,11 +14,8 @@ export default function CheckoutButton() {
   if (!mounted) return null
 
   function isValid() {
-    const { meat, customer } = order
-    if (!meat.pickupDate) return false
-    if (!meat.weight) return false
-    if (meat.weight === 'custom' && !meat.customWeight) return false
-    if (!meat.cut) return false
+    const { cart, customer } = order
+    if (cart.length === 0) return false
     if (!customer.name || !customer.phone || !customer.email) return false
     return true
   }
@@ -37,7 +34,9 @@ export default function CheckoutButton() {
           <span>→</span>
         </>
       ) : (
-        'Complete All Details Above'
+        order.cart.length === 0
+          ? 'Add Items to Cart Above'
+          : 'Complete Your Details Above'
       )}
     </button>
   )

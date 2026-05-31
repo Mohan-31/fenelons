@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CalendarDays, Plus, X } from 'lucide-react'
+import { CalendarDays, Plus, X, ShoppingCart, Check } from 'lucide-react'
 import { format } from 'date-fns'
 import { useOrder } from '@/app/context/OrderContext'
 import Calendar from './Calendar'
@@ -34,6 +34,15 @@ const OTHER_PRODUCTS: Record<OtherSub, string[]> = {
   Chicken: ['Chicken Legs', 'Chicken Breast', 'Chicken Wings', 'Chicken Drumsticks', 'Chicken Fillets'],
 }
 
+interface DraftState {
+  meatType: string
+  pickupDate: string
+  weight: number | 'custom' | undefined
+  customWeight: string
+  cut: string
+  notes: string
+}
+
 function FeneIcon({ open }: { open: boolean }) {
   return (
     <span
@@ -52,27 +61,39 @@ function getMeatType(title: string) {
   return ''
 }
 
+function makeDraft(title: string): DraftState {
+  return {
+    meatType: getMeatType(title),
+    pickupDate: '',
+    weight: undefined,
+    customWeight: '',
+    cut: '',
+    notes: '',
+  }
+}
+
 export default function MeatCard({ title, description }: Props) {
-  const { order, updateMeat } = useOrder()
+  const { addToCart } = useOrder()
   const [open, setOpen] = useState(false)
   const [showTerms, setShowTerms] = useState(false)
   const [agreed, setAgreed] = useState(false)
+  const [added, setAdded] = useState(false)
+  const [draft, setDraft] = useState<DraftState>(() => makeDraft(title))
 
   const isOther = title === 'Other Meats'
   const isTurkey = title === 'Turkey'
   const cuts = CUTS[title] || []
 
-  // Derive active subcategory from context meatType
   const currentSub: OtherSub | null = isOther
-    ? (OTHER_SUBCATEGORIES.find(s => s.toLowerCase() === order.meat.meatType) ?? null)
+    ? (OTHER_SUBCATEGORIES.find(s => s.toLowerCase() === draft.meatType) ?? null)
     : null
 
   const otherProducts = currentSub ? OTHER_PRODUCTS[currentSub] : []
 
   const finalWeight =
-    order.meat.weight === 'custom'
-      ? Number(order.meat.customWeight)
-      : Number(order.meat.weight)
+    draft.weight === 'custom'
+      ? Number(draft.customWeight)
+      : Number(draft.weight)
 
   const serves =
     finalWeight && finalWeight >= 3
@@ -80,25 +101,38 @@ export default function MeatCard({ title, description }: Props) {
       : null
 
   const isValid = isOther
-    ? !!order.meat.pickupDate && !!currentSub && !!order.meat.cut && !!order.meat.customWeight?.trim() && agreed
-    : !!order.meat.pickupDate && finalWeight >= 3 && !!order.meat.cut && agreed
+    ? !!draft.pickupDate && !!currentSub && !!draft.cut && !!draft.customWeight?.trim() && agreed
+    : !!draft.pickupDate && finalWeight >= 3 && !!draft.cut && agreed
+
+  function updateDraft(data: Partial<DraftState>) {
+    setDraft(prev => ({ ...prev, ...data }))
+  }
 
   function handleToggle() {
-    if (!open) {
-      if (isOther) {
-        // If no Other Meats subcategory is active, clear state for fresh selection
-        if (!OTHER_SUBCATEGORIES.some(s => s.toLowerCase() === order.meat.meatType)) {
-          updateMeat({ meatType: '', cut: '', weight: undefined, customWeight: '' })
-        }
-      } else {
-        updateMeat({ meatType: getMeatType(title) })
-      }
-    }
-    setOpen(!open)
+    setOpen(prev => !prev)
   }
 
   function selectSubcategory(sub: OtherSub) {
-    updateMeat({ meatType: sub.toLowerCase(), cut: '', customWeight: '', weight: 'custom' })
+    setDraft(prev => ({ ...prev, meatType: sub.toLowerCase(), cut: '', customWeight: '', weight: 'custom' }))
+  }
+
+  function handleAddToCart() {
+    if (!isValid) return
+    addToCart({
+      meatType: draft.meatType,
+      pickupDate: draft.pickupDate,
+      weight: draft.weight,
+      customWeight: draft.customWeight || undefined,
+      cut: draft.cut,
+      notes: draft.notes || undefined,
+    })
+    setDraft(makeDraft(title))
+    setAgreed(false)
+    setAdded(true)
+    setTimeout(() => {
+      setAdded(false)
+      setOpen(false)
+    }, 1500)
   }
 
   return (
@@ -200,9 +234,9 @@ export default function MeatCard({ title, description }: Props) {
                           <button
                             key={product}
                             type="button"
-                            onClick={() => updateMeat({ cut: product, meatType: currentSub.toLowerCase() })}
+                            onClick={() => updateDraft({ cut: product })}
                             className={`px-4 py-2.5 rounded-xl border-2 font-black text-xs uppercase tracking-wider transition-all ${
-                              order.meat.cut === product
+                              draft.cut === product
                                 ? 'border-[#8B0000] bg-[#8B0000] text-white'
                                 : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:border-gray-300 dark:hover:border-white/20'
                             }`}
@@ -223,8 +257,8 @@ export default function MeatCard({ title, description }: Props) {
                       <input
                         type="text"
                         placeholder="e.g. 2 pieces, 1.5kg, 4 fillets..."
-                        value={order.meat.customWeight || ''}
-                        onChange={(e) => updateMeat({ customWeight: e.target.value, weight: 'custom' })}
+                        value={draft.customWeight}
+                        onChange={(e) => updateDraft({ customWeight: e.target.value, weight: 'custom' })}
                         className="w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
                       />
                       <p className="mt-2 text-xs font-bold text-gray-400 dark:text-white/30">
@@ -240,24 +274,22 @@ export default function MeatCard({ title, description }: Props) {
                     </p>
                     <div
                       className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-sm mb-5 ${
-                        order.meat.pickupDate
+                        draft.pickupDate
                           ? 'bg-[#8B0000] text-white'
                           : 'bg-gray-100 dark:bg-white/8 text-gray-400 dark:text-white/40'
                       }`}
                     >
                       <CalendarDays size={15} />
                       <span>
-                        {order.meat.pickupDate
-                          ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
+                        {draft.pickupDate
+                          ? format(new Date(draft.pickupDate), 'EEEE, dd MMMM yyyy')
                           : 'Pick a date below'}
                       </span>
                     </div>
                     <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
                       <Calendar
-                        selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
-                        onSelect={(date) =>
-                          updateMeat({ pickupDate: date.toISOString(), meatType: currentSub?.toLowerCase() || order.meat.meatType })
-                        }
+                        selected={draft.pickupDate ? new Date(draft.pickupDate) : undefined}
+                        onSelect={(date) => updateDraft({ pickupDate: date.toISOString() })}
                       />
                     </div>
                   </div>
@@ -271,24 +303,22 @@ export default function MeatCard({ title, description }: Props) {
                     </p>
                     <div
                       className={`inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl font-black text-sm mb-5 ${
-                        order.meat.pickupDate
+                        draft.pickupDate
                           ? 'bg-[#8B0000] text-white'
                           : 'bg-gray-100 dark:bg-white/8 text-gray-400 dark:text-white/40'
                       }`}
                     >
                       <CalendarDays size={15} />
                       <span>
-                        {order.meat.pickupDate
-                          ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
+                        {draft.pickupDate
+                          ? format(new Date(draft.pickupDate), 'EEEE, dd MMMM yyyy')
                           : 'Pick a date below'}
                       </span>
                     </div>
                     <div className="rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-200 dark:border-white/8 p-3 max-w-xs">
                       <Calendar
-                        selected={order.meat.pickupDate ? new Date(order.meat.pickupDate) : undefined}
-                        onSelect={(date) =>
-                          updateMeat({ pickupDate: date.toISOString(), meatType: getMeatType(title) })
-                        }
+                        selected={draft.pickupDate ? new Date(draft.pickupDate) : undefined}
+                        onSelect={(date) => updateDraft({ pickupDate: date.toISOString() })}
                       />
                     </div>
                   </div>
@@ -302,17 +332,17 @@ export default function MeatCard({ title, description }: Props) {
                       {WEIGHTS.map((w) => {
                         const sel =
                           w.value === 'custom'
-                            ? order.meat.weight === 'custom'
-                            : order.meat.weight === w.value
+                            ? draft.weight === 'custom'
+                            : draft.weight === w.value
                         return (
                           <button
                             key={w.label}
                             type="button"
                             onClick={() => {
                               if (w.value === 'custom') {
-                                updateMeat({ weight: 'custom', customWeight: '', meatType: getMeatType(title) })
+                                updateDraft({ weight: 'custom', customWeight: '' })
                               } else {
-                                updateMeat({ weight: w.value as number, customWeight: '', meatType: getMeatType(title) })
+                                updateDraft({ weight: w.value as number, customWeight: '' })
                               }
                             }}
                             className={`flex flex-col items-center px-5 py-3.5 rounded-2xl border-2 font-black transition-all ${
@@ -330,14 +360,14 @@ export default function MeatCard({ title, description }: Props) {
                       })}
                     </div>
 
-                    {order.meat.weight === 'custom' && (
+                    {draft.weight === 'custom' && (
                       <input
                         type="number"
                         min={3}
                         step={0.5}
                         placeholder="Enter weight in kg (min 3kg)"
-                        value={order.meat.customWeight}
-                        onChange={(e) => updateMeat({ customWeight: e.target.value })}
+                        value={draft.customWeight}
+                        onChange={(e) => updateDraft({ customWeight: e.target.value })}
                         className="mt-4 w-full max-w-xs rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-3.5 font-black text-gray-900 dark:text-white focus:border-[#8B0000] outline-none transition-colors"
                       />
                     )}
@@ -360,9 +390,9 @@ export default function MeatCard({ title, description }: Props) {
                         <button
                           key={cut}
                           type="button"
-                          onClick={() => updateMeat({ cut, meatType: getMeatType(title) })}
+                          onClick={() => updateDraft({ cut })}
                           className={`px-4 py-2.5 rounded-xl border-2 font-black text-xs uppercase tracking-wider transition-all ${
-                            order.meat.cut === cut
+                            draft.cut === cut
                               ? 'border-[#8B0000] bg-[#8B0000] text-white'
                               : 'border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 text-gray-600 dark:text-white/60 hover:border-gray-300 dark:hover:border-white/20'
                           }`}
@@ -383,13 +413,13 @@ export default function MeatCard({ title, description }: Props) {
                 </p>
                 <textarea
                   placeholder="Any special preparation notes..."
-                  value={order.meat.notes || ''}
-                  onChange={(e) => updateMeat({ notes: e.target.value })}
+                  value={draft.notes}
+                  onChange={(e) => updateDraft({ notes: e.target.value })}
                   className="w-full rounded-2xl border-2 border-gray-200 dark:border-white/12 bg-white dark:bg-white/5 px-5 py-4 text-gray-900 dark:text-white resize-none h-24 focus:border-[#8B0000] outline-none transition-colors font-medium text-sm placeholder:text-gray-400 dark:placeholder:text-white/25"
                 />
               </div>
 
-              {/* 5. Terms */}
+              {/* Terms */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-100 dark:border-white/8">
                 <p className="flex-1 text-sm font-bold text-gray-500 dark:text-white/50">
                   Before proceeding, please read our{' '}
@@ -408,16 +438,24 @@ export default function MeatCard({ title, description }: Props) {
                 )}
               </div>
 
-              {/* 6. CTA */}
-              <button
-                disabled={!isValid}
-                onClick={() =>
-                  document.getElementById('customer-form')?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="w-full py-5 rounded-2xl bg-[#8B0000] text-white font-black uppercase tracking-widest text-sm disabled:opacity-25 disabled:cursor-not-allowed hover:bg-[#a50000] transition-colors"
-              >
-                {isValid ? 'Order Configured · Fill Your Details ↓' : 'Complete All Fields Above'}
-              </button>
+              {/* Add to Cart CTA */}
+              {added ? (
+                <div className="w-full py-5 rounded-2xl bg-green-600 text-white font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                  <Check size={18} /> Added to Cart!
+                </div>
+              ) : (
+                <button
+                  disabled={!isValid}
+                  onClick={handleAddToCart}
+                  className="w-full py-5 rounded-2xl bg-[#8B0000] text-white font-black uppercase tracking-widest text-sm disabled:opacity-25 disabled:cursor-not-allowed hover:bg-[#a50000] transition-colors flex items-center justify-center gap-2"
+                >
+                  {isValid ? (
+                    <><ShoppingCart size={18} /> Add to Cart</>
+                  ) : (
+                    'Complete All Fields Above'
+                  )}
+                </button>
+              )}
             </div>
           </motion.div>
         )}

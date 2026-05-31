@@ -5,11 +5,18 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import { ADVANCE_PRICE_EUR } from '@/app/config/pricing'
+import { useOrder } from '@/app/context/OrderContext'
+import type { CartItem } from '@/app/context/OrderContext'
 
-async function generateAndDownloadReceipt(order: {
-  meat: { meatType?: string; pickupDate?: string; weight?: number | 'custom'; customWeight?: string; cut?: string; notes?: string }
-  customer: { name: string; phone: string; email: string }
-}, paymentRef: string) {
+const MEAT_LABELS: Record<string, string> = {
+  turkey: 'Turkey', ham: 'Ham', beef: 'Beef', lamb: 'Lamb', chicken: 'Chicken',
+}
+
+async function generateAndDownloadReceipt(
+  cart: CartItem[],
+  customer: { name: string; phone: string; email: string },
+  paymentRef: string,
+) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
@@ -33,7 +40,6 @@ async function generateAndDownloadReceipt(order: {
 
   y = 52
 
-  // Order meta
   const today = format(new Date(), 'dd MMMM yyyy')
   const shortRef = paymentRef ? `#${paymentRef.slice(-8).toUpperCase()}` : '#FENELONS'
 
@@ -45,7 +51,6 @@ async function generateAndDownloadReceipt(order: {
 
   y += 14
 
-  // Section: Customer
   function drawSection(title: string) {
     doc.setFillColor(245, 245, 245)
     doc.roundedRect(margin, y - 5, contentW, 8, 1, 1, 'F')
@@ -68,36 +73,38 @@ async function generateAndDownloadReceipt(order: {
   }
 
   drawSection('Customer Information')
-  drawRow('Name', order.customer.name)
-  drawRow('Phone', order.customer.phone)
-  drawRow('Email', order.customer.email)
+  drawRow('Name', customer.name)
+  drawRow('Phone', customer.phone)
+  drawRow('Email', customer.email)
 
   y += 4
 
-  // Section: Order Details
-  const weightLabel =
-    order.meat.weight === 'custom'
-      ? `${order.meat.customWeight}kg (custom)`
-      : `${order.meat.weight}kg`
+  // Each cart item as its own section
+  cart.forEach((item, i) => {
+    const meatLabel = item.meatType
+      ? (MEAT_LABELS[item.meatType] || item.meatType.charAt(0).toUpperCase() + item.meatType.slice(1))
+      : 'N/A'
 
-  const pickupLabel = order.meat.pickupDate
-    ? format(new Date(order.meat.pickupDate), 'EEEE, dd MMMM yyyy')
-    : 'Not specified'
+    const weightLabel =
+      item.weight === 'custom'
+        ? `${item.customWeight || '—'}`
+        : item.weight
+        ? `${item.weight}kg`
+        : '—'
 
-  const meatLabel = order.meat.meatType
-    ? order.meat.meatType.charAt(0).toUpperCase() + order.meat.meatType.slice(1)
-    : 'N/A'
+    const pickupLabel = item.pickupDate
+      ? format(new Date(item.pickupDate), 'EEEE, dd MMMM yyyy')
+      : 'Not specified'
 
-  drawSection('Order Details')
-  drawRow('Meat Type', meatLabel)
-  drawRow('Cut', order.meat.cut || 'N/A')
-  drawRow('Weight', weightLabel)
-  drawRow('Collection Date', pickupLabel)
-  if (order.meat.notes) drawRow('Special Requests', order.meat.notes)
+    drawSection(`Order Item ${i + 1}`)
+    drawRow('Meat Type', meatLabel)
+    drawRow('Cut / Product', item.cut || 'N/A')
+    drawRow('Weight / Qty', weightLabel)
+    drawRow('Collection Date', pickupLabel)
+    if (item.notes) drawRow('Special Requests', item.notes)
+    y += 4
+  })
 
-  y += 4
-
-  // Section: Payment
   drawSection('Payment Summary')
 
   doc.setTextColor(100, 100, 100)
@@ -117,7 +124,6 @@ async function generateAndDownloadReceipt(order: {
   doc.text('Payable in-store on collection day', margin + 52, y)
   y += 16
 
-  // Footer box
   doc.setFillColor(253, 247, 247)
   doc.setDrawColor(220, 180, 180)
   doc.roundedRect(margin, y, contentW, 28, 2, 2, 'FD')
@@ -137,6 +143,7 @@ async function generateAndDownloadReceipt(order: {
 }
 
 export default function SuccessPage() {
+  const { clearCart } = useOrder()
   const downloaded = useRef(false)
 
   useEffect(() => {
@@ -158,16 +165,22 @@ export default function SuccessPage() {
     if (!raw) return
 
     try {
-      const order = JSON.parse(raw)
-      generateAndDownloadReceipt(order, paymentRef)
+      const saved = JSON.parse(raw)
+      const cart: CartItem[] = Array.isArray(saved.cart) ? saved.cart : []
+      const customer = saved.customer || { name: '', phone: '', email: '' }
+
+      if (cart.length > 0) {
+        generateAndDownloadReceipt(cart, customer, paymentRef).then(() => {
+          clearCart()
+        })
+      }
     } catch {
       console.error('Could not generate receipt')
     }
-  }, [])
+  }, [clearCart])
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex flex-col items-center justify-center px-6 text-center overflow-hidden">
-      {/* Background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(34,197,94,0.04),_transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,_rgba(34,197,94,0.06),_transparent_60%)] pointer-events-none" />
 
       <motion.div
@@ -176,14 +189,12 @@ export default function SuccessPage() {
         transition={{ type: 'spring', damping: 22, stiffness: 200 }}
         className="relative max-w-lg w-full"
       >
-        {/* Badge */}
         <div className="inline-block px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
           <span className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500 dark:text-green-400">
             Order Confirmed
           </span>
         </div>
 
-        {/* Headline */}
         <h1
           className="font-black italic uppercase text-gray-900 dark:text-white leading-none mb-4"
           style={{ fontSize: 'clamp(3rem, 10vw, 6rem)' }}
@@ -201,7 +212,6 @@ export default function SuccessPage() {
           Your receipt has been downloaded automatically.
         </p>
 
-        {/* Next steps */}
         <div className="mt-10 p-6 rounded-3xl bg-gray-100 dark:bg-white/4 border border-gray-200 dark:border-white/8 text-left space-y-4">
           {[
             'Check your email for a confirmation receipt.',

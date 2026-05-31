@@ -1,6 +1,7 @@
 'use client'
 
 import MeatCard from './MeatCard'
+import CartSummary from './CartSummary'
 import CustomerForm from './CustomerForm'
 import CheckoutButton from './CheckoutButton'
 
@@ -30,6 +31,9 @@ export default function OrderSection() {
         <MeatCard title="Ham" description="Honey-glazed and traditional hams" />
         <MeatCard title="Other Meats" description="Custom festive cuts" />
       </div>
+
+      {/* Cart Summary */}
+      <CartSummary />
 
       {/* Divider */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 mt-8 mb-4 flex items-center gap-4">

@@ -5,18 +5,22 @@ import Sidebar from '@/app/components/admin/Sidebar'
 import {
   Search, X, CheckCircle2, Circle,
   AlertCircle, ArrowLeft, ChevronRight,
-  Package, Loader2, Filter, SlidersHorizontal
+  Package, Loader2, Filter, SlidersHorizontal,
+  Eye, Phone, Mail, CalendarDays, ClipboardList,
 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Order {
   id: string
   customerName: string
+  customerPhone: string
+  customerEmail: string
   status: 'pending' | 'done'
   cut: string
   weight: number
   meatType: string
   customWeight: string | null
+  notes: string | null
   pickupDate: string
   isNew: boolean
   version: number
@@ -42,6 +46,7 @@ export default function OtherMeatsPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [error, setError] = useState<string | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
 
   // Filters
   const [search, setSearch] = useState('')
@@ -80,6 +85,9 @@ export default function OtherMeatsPage() {
       if (!res.ok) throw new Error('Failed to update order')
       const { order: updated } = await res.json()
       setOrders(prev => prev.map(o => o.id === updated.id ? { ...o, ...updated } : o))
+      if (selectedOrder?.id === updated.id) {
+        setSelectedOrder(prev => prev ? { ...prev, ...updated } : null)
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Update failed')
     } finally {
@@ -415,31 +423,15 @@ export default function OtherMeatsPage() {
                 key={order.id}
                 className={`bg-white border-2 rounded-2xl p-4 transition-all ${
                   order.status === 'done'
-                    ? 'border-gray-100 opacity-40'
+                    ? 'border-gray-100 opacity-50'
                     : order.isNew
                     ? 'border-[#8B0000]/30'
                     : 'border-gray-100'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleMarkDone(order)}
-                    disabled={updatingOrderId === order.id || order.status === 'done'}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      order.status === 'done'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-400'
-                    }`}
-                  >
-                    {updatingOrderId === order.id
-                      ? <Loader2 size={20} className="animate-spin text-[#8B0000]" />
-                      : order.status === 'done'
-                      ? <CheckCircle2 size={22} />
-                      : <Circle size={22} />
-                    }
-                  </button>
-
-                  <div className="flex-1 min-w-0">
+                {/* Top: name + badges */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-black text-gray-900 uppercase">{order.customerName}</p>
                       {order.meatType && (
@@ -451,28 +443,185 @@ export default function OtherMeatsPage() {
                         <span className="px-2 py-0.5 bg-[#8B0000]/10 text-[#8B0000] text-[9px] font-black uppercase tracking-widest rounded">New</span>
                       )}
                     </div>
-                    <p className="text-[10px] font-bold text-gray-400 font-mono mt-0.5">#{order.id.slice(-8).toUpperCase()}</p>
-                    <div className="grid grid-cols-3 gap-3 mt-2">
-                      <div>
-                        <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Product</p>
-                        <p className="font-black text-gray-900 text-xs uppercase leading-tight">{order.cut}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Qty / Weight</p>
-                        <p className="font-black text-gray-900 text-sm">{order.customWeight || (order.weight > 0 ? `${order.weight}kg` : '—')}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Pickup</p>
-                        <p className="font-black text-gray-900 text-xs">{new Date(order.pickupDate).toLocaleDateString('en-GB')}</p>
-                      </div>
-                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 font-mono mt-0.5">
+                      #{order.id.slice(-8).toUpperCase()}
+                    </p>
                   </div>
+                  <span className={`shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                    order.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700'
+                  }`}>
+                    {order.status}
+                  </span>
+                </div>
+
+                {/* Details grid */}
+                <div className="grid grid-cols-3 gap-3 mt-2 mb-4">
+                  <div>
+                    <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Product</p>
+                    <p className="font-black text-gray-900 text-xs uppercase leading-tight">{order.cut}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Qty / Weight</p>
+                    <p className="font-black text-gray-900 text-sm">{order.customWeight || (order.weight > 0 ? `${order.weight}kg` : '—')}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 font-black uppercase text-[9px] tracking-wider">Pickup</p>
+                    <p className="font-black text-gray-900 text-xs">{new Date(order.pickupDate).toLocaleDateString('en-GB')}</p>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 font-black uppercase text-xs tracking-wider hover:border-gray-400 hover:text-gray-900 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Eye size={13} /> View Details
+                  </button>
+                  <button
+                    onClick={() => handleMarkDone(order)}
+                    disabled={updatingOrderId === order.id || order.status === 'done'}
+                    className={`flex-1 py-2.5 rounded-xl font-black uppercase text-xs tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:cursor-not-allowed ${
+                      order.status === 'done'
+                        ? 'bg-green-50 text-green-600 border-2 border-green-100'
+                        : 'bg-[#8B0000] text-white hover:bg-[#a50000]'
+                    }`}
+                  >
+                    {updatingOrderId === order.id ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : order.status === 'done' ? (
+                      <><CheckCircle2 size={13} /> Done</>
+                    ) : (
+                      <><Circle size={13} /> Mark Done</>
+                    )}
+                  </button>
                 </div>
               </div>
             ))}
           </section>
         </div>
       </main>
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 transition-colors"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="flex items-start gap-3 mb-5">
+              <div className="w-10 h-10 rounded-2xl bg-[#8B0000]/10 flex items-center justify-center shrink-0">
+                <ClipboardList size={18} className="text-[#8B0000]" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black uppercase italic text-gray-900 leading-none">Order Details</h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">
+                  #{selectedOrder.id.slice(-8).toUpperCase()}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-5">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${
+                selectedOrder.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700'
+              }`}>
+                {selectedOrder.status === 'done' ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                {selectedOrder.status}
+              </span>
+              {selectedOrder.meatType && (
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${
+                  SUB_COLORS[selectedOrder.meatType] || 'bg-gray-100 text-gray-600'
+                }`}>
+                  {SUB_LABELS[selectedOrder.meatType] || selectedOrder.meatType}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              {/* Customer */}
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 mb-2">Customer</p>
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[10px] font-black uppercase text-gray-400">Name</span>
+                    <span className="text-sm font-black text-gray-900">{selectedOrder.customerName}</span>
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="flex items-center gap-1 text-[10px] font-black uppercase text-gray-400">
+                      <Phone size={10} /> Phone
+                    </span>
+                    <a href={`tel:${selectedOrder.customerPhone}`} className="text-sm font-black text-[#8B0000] hover:underline">
+                      {selectedOrder.customerPhone}
+                    </a>
+                  </div>
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="flex items-center gap-1 text-[10px] font-black uppercase text-gray-400 shrink-0">
+                      <Mail size={10} /> Email
+                    </span>
+                    <a href={`mailto:${selectedOrder.customerEmail}`} className="text-sm font-black text-[#8B0000] hover:underline text-right break-all">
+                      {selectedOrder.customerEmail}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order */}
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 mb-2">Order</p>
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[10px] font-black uppercase text-gray-400">Product</span>
+                    <span className="text-sm font-black text-gray-900">{selectedOrder.cut}</span>
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-[10px] font-black uppercase text-gray-400">Qty / Weight</span>
+                    <span className="text-sm font-black text-gray-900">
+                      {selectedOrder.customWeight || (selectedOrder.weight > 0 ? `${selectedOrder.weight}kg` : '—')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="flex items-center gap-1 text-[10px] font-black uppercase text-gray-400">
+                      <CalendarDays size={10} /> Pickup
+                    </span>
+                    <span className="text-sm font-black text-gray-900 text-right">
+                      {new Date(selectedOrder.pickupDate).toLocaleDateString('en-GB', {
+                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedOrder.notes && (
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-400 mb-2">Special Requests</p>
+                  <p className="text-sm text-gray-700 font-medium bg-gray-50 rounded-2xl p-4 leading-relaxed">
+                    {selectedOrder.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer action */}
+            {selectedOrder.status === 'pending' && (
+              <button
+                onClick={() => {
+                  handleMarkDone(selectedOrder)
+                  setSelectedOrder(null)
+                }}
+                className="mt-5 w-full py-3.5 rounded-2xl bg-[#8B0000] text-white font-black uppercase tracking-wider text-sm hover:bg-[#a50000] transition-colors flex items-center justify-center gap-2"
+              >
+                <Circle size={14} /> Mark as Done
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Bulk Mark Modal */}
       {isBulkMarkOpen && (

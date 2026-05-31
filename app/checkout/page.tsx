@@ -11,11 +11,19 @@ import { ADVANCE_PRICE_EUR } from '@/app/config/pricing'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
+const MEAT_LABELS: Record<string, string> = {
+  turkey: 'Turkey',
+  ham: 'Ham',
+  beef: 'Beef',
+  lamb: 'Lamb',
+  chicken: 'Chicken',
+}
+
 export default function CheckoutPage() {
   const { order } = useOrder()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
 
-  const hasOrder = !!order.meat.pickupDate && !!order.customer.email
+  const hasOrder = order.cart.length > 0 && !!order.customer.email
 
   useEffect(() => {
     if (!hasOrder || clientSecret) return
@@ -25,7 +33,7 @@ export default function CheckoutPage() {
         const res = await fetch('/api/stripe/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meat: order.meat, customer: order.customer }),
+          body: JSON.stringify({ cart: order.cart, customer: order.customer }),
         })
         const data = await res.json()
         if (data.clientSecret) setClientSecret(data.clientSecret)
@@ -68,18 +76,9 @@ export default function CheckoutPage() {
     )
   }
 
-  const meatLabel = order.meat.meatType
-    ? order.meat.meatType.charAt(0).toUpperCase() + order.meat.meatType.slice(1)
-    : ''
-
-  const weightLabel =
-    order.meat.weight === 'custom'
-      ? `${order.meat.customWeight}kg (custom)`
-      : `${order.meat.weight}kg`
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
-      {/* Back link below global navbar */}
+      {/* Back link */}
       <div className="px-6 md:px-12 py-3 border-b border-gray-200 dark:border-white/5">
         <Link
           href="/#order"
@@ -97,33 +96,74 @@ export default function CheckoutPage() {
             Order Summary
           </p>
           <h1
-            className="font-black italic uppercase text-gray-900 dark:text-white leading-none mb-10"
+            className="font-black italic uppercase text-gray-900 dark:text-white leading-none mb-8"
             style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
           >
             Secure<br />Checkout.
           </h1>
 
-          <div className="space-y-1">
+          {/* Cart items */}
+          <div className="space-y-3 mb-6">
+            {order.cart.map((item, i) => (
+              <div key={item.id} className="bg-white dark:bg-white/5 rounded-2xl p-4 border border-gray-200 dark:border-white/8">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">
+                    Item {i + 1}
+                  </span>
+                  {item.meatType && (
+                    <span className="text-[9px] font-black uppercase tracking-wider text-[#8B0000]">
+                      {MEAT_LABELS[item.meatType] || item.meatType}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {[
+                    { label: 'Cut', value: item.cut || '' },
+                    {
+                      label: 'Weight',
+                      value: item.weight === 'custom'
+                        ? `${item.customWeight || '—'}`
+                        : item.weight
+                        ? `${item.weight}kg`
+                        : '—',
+                    },
+                    {
+                      label: 'Pickup',
+                      value: item.pickupDate
+                        ? format(new Date(item.pickupDate), 'dd MMM yyyy')
+                        : '—',
+                    },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-white/30">
+                        {label}
+                      </span>
+                      <span className="text-xs font-black text-gray-900 dark:text-white">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Customer */}
+          <div className="space-y-1 border-t border-gray-200 dark:border-white/5 pt-4 mb-4">
             {[
-              { label: 'Meat',     value: meatLabel },
-              { label: 'Cut',      value: order.meat.cut || '' },
-              { label: 'Weight',   value: weightLabel },
-              { label: 'Pickup',   value: order.meat.pickupDate ? format(new Date(order.meat.pickupDate), 'dd MMM yyyy') : '' },
-              { label: 'Customer', value: order.customer.name || '' },
-              { label: 'Email',    value: order.customer.email || '' },
+              { label: 'Customer', value: order.customer.name },
+              { label: 'Email', value: order.customer.email },
             ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-white/5">
+              <div key={label} className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-white/30">
                   {label}
                 </span>
-                <span className="text-sm font-black text-gray-900 dark:text-white max-w-[60%] text-right">
+                <span className="text-sm font-black text-gray-900 dark:text-white max-w-[60%] text-right truncate">
                   {value}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-between items-center py-4 px-5 bg-[#8B0000]/10 border border-[#8B0000]/20 rounded-2xl mt-5">
+          <div className="flex justify-between items-center py-4 px-5 bg-[#8B0000]/10 border border-[#8B0000]/20 rounded-2xl">
             <span className="text-xs font-black uppercase tracking-[0.15em] text-[#8B0000] dark:text-[#cc4444]">
               Deposit Due Today
             </span>
