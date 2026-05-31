@@ -115,25 +115,25 @@ export default function Sidebar() {
           <div className="pt-4 border-t border-white/10 space-y-2">
             {bottomItems.map(item => {
               const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`
-                    flex items-center rounded-xl transition-all
-                    ${isCollapsed
-                      ? 'justify-center h-12'
-                      : 'gap-4 px-4 py-3'}
-                    ${item.isLogout 
-                      ? 'text-red-400 hover:bg-red-500/10 hover:text-red-500' 
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'}
-                  `}
-                >
+              const cls = `
+                flex items-center rounded-xl transition-all
+                ${isCollapsed ? 'justify-center h-12' : 'gap-4 px-4 py-3'}
+                ${item.isLogout
+                  ? 'text-red-400 hover:bg-red-500/10 hover:text-red-500'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'}
+              `
+              const inner = (
+                <>
                   <Icon size={22} />
-                  {!isCollapsed && (
-                    <span className="font-bold">{item.name}</span>
-                  )}
+                  {!isCollapsed && <span className="font-bold">{item.name}</span>}
+                </>
+              )
+              if (item.isLogout) {
+                return <a key={item.name} href={item.href} className={cls}>{inner}</a>
+              }
+              return (
+                <Link key={item.name} href={item.href} onClick={() => setIsOpen(false)} className={cls}>
+                  {inner}
                 </Link>
               )
             })}

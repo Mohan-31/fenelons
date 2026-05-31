@@ -70,12 +70,12 @@ export default function OrdersGateway() {
               <div className="space-y-8">
                 <div>
                   <div className="flex justify-between mb-3 text-sm font-black uppercase tracking-tight">
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-900">
                       <span className="text-base font-black italic text-[#8B0000]">F</span> Turkeys
                     </span>
-                    <span className="text-gray-900">{summary.turkey} Units</span>
+                    <span className="text-[#8B0000]">{summary.turkey} Units</span>
                   </div>
-                  <div className="w-full bg-gray-50 h-6 rounded-2xl overflow-hidden border p-1">
+                  <div className="w-full bg-gray-100 h-6 rounded-2xl overflow-hidden border p-1">
                     <div
                       className="bg-[#8B0000] h-full rounded-xl transition-all duration-1000 ease-out shadow-lg"
                       style={{ width: `${turkeyPercentage}%` }}
@@ -85,12 +85,12 @@ export default function OrdersGateway() {
 
                 <div>
                   <div className="flex justify-between mb-3 text-sm font-black uppercase tracking-tight">
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-900">
                       <span className="text-base font-black italic text-[#8B0000]">F</span> Hams
                     </span>
-                    <span className="text-gray-900">{summary.ham} Units</span>
+                    <span className="text-[#8B0000]">{summary.ham} Units</span>
                   </div>
-                  <div className="w-full bg-gray-50 h-6 rounded-2xl overflow-hidden border p-1">
+                  <div className="w-full bg-gray-100 h-6 rounded-2xl overflow-hidden border p-1">
                     <div
                       className="bg-[#8B0000] h-full rounded-xl transition-all duration-1000 ease-out shadow-lg"
                       style={{ width: `${hamPercentage}%` }}
@@ -114,7 +114,7 @@ export default function OrdersGateway() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
             <Link
               href="/admin/orders/turkey"
-              className="group bg-white p-8 md:p-12 rounded-[48px] border-2 border-transparent hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
+              className="group bg-red-50 p-8 md:p-12 rounded-[48px] border-2 border-red-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
             >
               <div className="flex justify-between items-start">
                 <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
@@ -130,7 +130,7 @@ export default function OrdersGateway() {
 
             <Link
               href="/admin/orders/ham"
-              className="group bg-white p-8 md:p-12 rounded-[48px] border-2 border-transparent hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
+              className="group bg-[#fff5f0] p-8 md:p-12 rounded-[48px] border-2 border-orange-100 hover:border-[#8B0000] transition-all shadow-sm hover:shadow-2xl"
             >
               <div className="flex justify-between items-start">
                 <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center group-hover:rotate-6 transition-transform duration-300">
