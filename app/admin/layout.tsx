@@ -13,7 +13,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const cookieStore = await cookies()
     const session = cookieStore.get('admin_session')
     if (session?.value !== 'true') {
-      redirect('/admin/login')
+      const returnTo = pathname ? `?redirect=${encodeURIComponent(pathname)}` : ''
+      redirect(`/admin/login${returnTo}`)
     }
   }
 

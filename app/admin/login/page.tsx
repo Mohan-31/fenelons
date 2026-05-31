@@ -18,7 +18,7 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/admin/login', { 
+      const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -30,7 +30,10 @@ export default function AdminLogin() {
         return
       }
 
-      router.push('/admin/dashboard')
+      const params = new URLSearchParams(window.location.search)
+      const redirectTo = params.get('redirect') || '/admin/dashboard'
+      const safe = redirectTo.startsWith('/admin') ? redirectTo : '/admin/dashboard'
+      router.push(safe)
     } catch (err) {
       setError('Something went wrong. Please try again.')
       setLoading(false)
