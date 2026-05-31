@@ -59,8 +59,8 @@ export default function OrdersGateway() {
             <div className="xl:col-span-2 bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-sm space-y-8">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-black uppercase text-sm text-gray-400 tracking-widest leading-none">Volume Split</h3>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase italic mt-1">Live Inventory Ratio</p>
+                  <h3 className="font-black uppercase text-sm text-gray-700 tracking-widest leading-none">Volume Split</h3>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase italic mt-1">Live Inventory Ratio</p>
                 </div>
                 <div className="p-3 bg-red-50 rounded-2xl">
                   <TrendingUp className="text-[#8B0000]" size={24} />
@@ -123,8 +123,8 @@ export default function OrdersGateway() {
                 <ArrowRight className="text-gray-200 group-hover:text-[#8B0000] group-hover:translate-x-2 transition-all" size={32} />
               </div>
               <div className="mt-8">
-                <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none">Turkey<br />Orders</h2>
-                <p className="text-gray-400 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
+                <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none text-gray-900">Turkey<br />Orders</h2>
+                <p className="text-gray-500 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
               </div>
             </Link>
 
@@ -139,8 +139,8 @@ export default function OrdersGateway() {
                 <ArrowRight className="text-gray-200 group-hover:text-[#8B0000] group-hover:translate-x-2 transition-all" size={32} />
               </div>
               <div className="mt-8">
-                <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none">Ham<br />Orders</h2>
-                <p className="text-gray-400 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
+                <h2 className="text-3xl md:text-4xl font-black uppercase italic leading-none text-gray-900">Ham<br />Orders</h2>
+                <p className="text-gray-500 font-bold mt-4 uppercase text-[10px] tracking-[0.2em]">Enter Production Floor →</p>
               </div>
             </Link>
           </div>

@@ -246,7 +246,7 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
             <h1 className="text-5xl md:text-7xl font-black italic uppercase text-gray-900 leading-none">
               {meatType}<span className="text-[#8B0000]">.</span>
             </h1>
-            <p className="text-gray-400 font-bold uppercase text-[9px] tracking-[0.3em]">Production Floor</p>
+            <p className="text-gray-600 font-bold uppercase text-[9px] tracking-[0.3em]">Production Floor</p>
           </div>
 
           {/* Production Queue Stats */}
@@ -265,7 +265,7 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
                       cutFilters.has(cut) ? 'border-[#8B0000] shadow-md' : 'border-gray-100 hover:border-gray-200'
                     }`}
                   >
-                    <h3 className="font-black uppercase italic text-gray-900 text-xs mb-2 flex justify-between items-center">
+                    <h3 className="font-black uppercase italic text-gray-800 text-xs mb-2 flex justify-between items-center">
                       {cut}
                       {cutFilters.has(cut) && <span className="w-2 h-2 bg-[#8B0000] rounded-full" />}
                     </h3>
@@ -555,8 +555,8 @@ export default function ProductionPage({ params }: { params: Promise<{ meatType:
             >
               <X size={20} />
             </button>
-            <h2 className="text-xl font-black uppercase italic mb-1">Bulk Mark Done</h2>
-            <p className="text-gray-400 font-bold text-xs mb-5">
+            <h2 className="text-xl font-black uppercase italic mb-1 text-gray-900">Bulk Mark Done</h2>
+            <p className="text-gray-600 font-bold text-xs mb-5">
               Marks the first N pending orders as done, sorted by pickup date.
             </p>
             <input

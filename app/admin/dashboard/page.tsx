@@ -6,26 +6,22 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null)
+  const [chartData, setChartData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Mock data for graphs (Replace with real data from stats API if available)
-  const chartData = [
-    { name: 'Mon', sales: 400, orders: 12 },
-    { name: 'Tue', sales: 300, orders: 8 },
-    { name: 'Wed', sales: 900, orders: 25 },
-    { name: 'Thu', sales: 600, orders: 18 },
-    { name: 'Fri', sales: 1200, orders: 32 },
-    { name: 'Sat', sales: 1500, orders: 40 },
-    { name: 'Sun', sales: 1100, orders: 28 },
-  ]
-
   useEffect(() => {
-    fetch('/api/admin/stats')
-      .then(res => res.json())
-      .then(data => {
-        setStats(data)
-        setLoading(false)
-      })
+    Promise.all([
+      fetch('/api/admin/stats').then(r => r.json()),
+      fetch('/api/admin/stats/daily').then(r => r.json()),
+    ]).then(([statsData, dailyData]) => {
+      setStats(statsData)
+      setChartData(Array.isArray(dailyData) ? dailyData.map((d: any) => ({
+        name: d.name,
+        sales: d.revenue,
+        orders: d.orders,
+      })) : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return (
@@ -55,7 +51,7 @@ export default function Dashboard() {
         >
         <header className="mb-10 mt-4 lg:mt-0">
           <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter uppercase italic">Analytics<span className="text-[#8B0000]">.</span></h1>
-          <p className="text-gray-400 font-bold uppercase text-[9px] tracking-[0.3em] mt-1">Real-time store performance</p>
+          <p className="text-gray-600 font-bold uppercase text-[9px] tracking-[0.3em] mt-1">Real-time store performance</p>
         </header>
 
         {/* STATS GRID */}
@@ -79,7 +75,7 @@ export default function Dashboard() {
         {/* GRAPHS SECTION */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
           <div className="bg-white p-6 md:p-8 rounded-[32px] border-2 border-gray-100 shadow-sm">
-            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-6 uppercase italic">Revenue Trend (€)</h3>
+            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-6 uppercase italic">Revenue Trend · Last 7 Days (€)</h3>
             <div className="w-full h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
