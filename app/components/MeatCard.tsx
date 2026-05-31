@@ -75,8 +75,6 @@ function makeDraft(title: string): DraftState {
 export default function MeatCard({ title, description }: Props) {
   const { addToCart } = useOrder()
   const [open, setOpen] = useState(false)
-  const [showTerms, setShowTerms] = useState(false)
-  const [agreed, setAgreed] = useState(false)
   const [added, setAdded] = useState(false)
   const [draft, setDraft] = useState<DraftState>(() => makeDraft(title))
 
@@ -101,8 +99,8 @@ export default function MeatCard({ title, description }: Props) {
       : null
 
   const isValid = isOther
-    ? !!draft.pickupDate && !!currentSub && !!draft.cut && !!draft.customWeight?.trim() && agreed
-    : !!draft.pickupDate && finalWeight >= 3 && !!draft.cut && agreed
+    ? !!draft.pickupDate && !!currentSub && !!draft.cut && !!draft.customWeight?.trim()
+    : !!draft.pickupDate && finalWeight >= 3 && !!draft.cut
 
   function updateDraft(data: Partial<DraftState>) {
     setDraft(prev => ({ ...prev, ...data }))
@@ -127,7 +125,6 @@ export default function MeatCard({ title, description }: Props) {
       notes: draft.notes || undefined,
     })
     setDraft(makeDraft(title))
-    setAgreed(false)
     setAdded(true)
     setTimeout(() => {
       setAdded(false)
@@ -419,25 +416,6 @@ export default function MeatCard({ title, description }: Props) {
                 />
               </div>
 
-              {/* Terms */}
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/4 border border-gray-100 dark:border-white/8">
-                <p className="flex-1 text-sm font-bold text-gray-500 dark:text-white/50">
-                  Before proceeding, please read our{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTerms(true)}
-                    className="text-[#8B0000] font-black underline underline-offset-2"
-                  >
-                    Order Terms &amp; Conditions
-                  </button>
-                </p>
-                {agreed && (
-                  <span className="text-green-600 font-black text-xs uppercase tracking-wider shrink-0">
-                    ✓ Agreed
-                  </span>
-                )}
-              </div>
-
               {/* Add to Cart CTA */}
               {added ? (
                 <div className="w-full py-5 rounded-2xl bg-green-600 text-white font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2">
@@ -461,72 +439,6 @@ export default function MeatCard({ title, description }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Terms modal */}
-      <AnimatePresence>
-        {showTerms && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-7 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
-              initial={{ y: 80, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 80, opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            >
-              <div className="w-10 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
-              <h3 className="text-2xl font-black italic uppercase text-gray-900">Order Terms</h3>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 mb-6">
-                Please read before proceeding
-              </p>
-
-              <ul className="space-y-3">
-                {[
-                  'Orders must be collected strictly on the selected pickup date.',
-                  'Remaining balance must be paid in-store on collection.',
-                  'Late collection may affect product quality.',
-                  'No refunds or replacements for late pickups.',
-                  'Orders cannot be processed earlier or later than booked.',
-                ].map((term, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-gray-700 font-medium">
-                    <span className="w-5 h-5 rounded-full bg-[#8B0000]/10 text-[#8B0000] flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    {term}
-                  </li>
-                ))}
-              </ul>
-
-              <div
-                className="mt-7 flex items-center gap-3 p-4 rounded-2xl bg-gray-50 cursor-pointer select-none"
-                onClick={() => setAgreed((a) => !a)}
-              >
-                <div
-                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all shrink-0 ${
-                    agreed ? 'border-[#8B0000] bg-[#8B0000]' : 'border-gray-300'
-                  }`}
-                >
-                  {agreed && <span className="text-white text-xs font-black">✓</span>}
-                </div>
-                <span className="text-sm font-black text-gray-900">
-                  I understand and agree to these terms
-                </span>
-              </div>
-
-              <button
-                disabled={!agreed}
-                onClick={() => setShowTerms(false)}
-                className="mt-4 w-full py-4 rounded-2xl bg-[#8B0000] text-white font-black uppercase tracking-widest text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#a50000] transition-colors"
-              >
-                Confirm &amp; Continue →
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
