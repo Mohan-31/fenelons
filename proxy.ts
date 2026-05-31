@@ -8,16 +8,24 @@ export function proxy(request: NextRequest) {
   const session = request.cookies.get('admin_session')
   const isAuthenticated = session?.value === 'true'
 
-  if (PUBLIC_ADMIN_PATHS.includes(pathname)) {
-    if (isAuthenticated) return NextResponse.redirect(new URL('/admin/dashboard', request.url))
-    return NextResponse.next()
+  const isPublic = PUBLIC_ADMIN_PATHS.some(p => pathname.startsWith(p))
+
+  // Forward pathname to server components via header
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', pathname)
+
+  if (isPublic) {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  if (!isAuthenticated) return NextResponse.redirect(new URL('/admin/login', request.url))
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL('/admin/login', request.url))
+  }
 
-  return NextResponse.next()
+  return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
-export const config = {
-  matcher: '/admin/:path*',
-}
+export const config = { matcher: '/admin/:path*' }

@@ -19,12 +19,6 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
 
-  useEffect(() => {
-    fetch('/api/admin/auth')
-      .then(res => { if (res.status === 401) window.location.href = '/admin/login' })
-      .catch(() => { window.location.href = '/admin/login' })
-  }, [pathname])
-
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     { name: 'Orders', icon: ShoppingCart, href: '/admin/orders' },
